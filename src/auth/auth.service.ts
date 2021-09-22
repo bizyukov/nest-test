@@ -2,6 +2,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { CreateUserDto } from '../users/dto/create-user.dto';
@@ -76,7 +77,14 @@ export class AuthService {
   }
 
   private async validateUser(userDto: CreateUserDto) {
+    console.log('userDto', userDto);
     const user = await this.userService.getUserByEmail(userDto.email);
+
+    if (!user) {
+      throw new NotFoundException({
+        message: 'Такой пользователь не зарегестрирован',
+      });
+    }
     const passwordEquals = await bcrypt.compare(
       userDto.password,
       user.password,
